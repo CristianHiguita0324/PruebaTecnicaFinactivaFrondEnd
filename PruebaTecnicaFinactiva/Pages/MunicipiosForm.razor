@@ -31,6 +31,8 @@
             <div class="col-sm-4">
                 <div class="col-sm-4">
                     <InputCheckbox class="form-control" @bind-Value="_municipio.Estado"></InputCheckbox>
+
+                   
                 </div>
             </div>
 
@@ -51,13 +53,14 @@
 @code {
     [Parameter]
     public int Id { get; set; }
-
+   
     public string idEstad = "0";
     public string url = "api/Municipio/";
     Municipio _municipio = new Municipio();
     ResponseService _respuesta = new ResponseService();
     Municipio municipio = new Municipio();
     public List<Estados> ListaEstados = new List<Estados>();
+    
     private async Task Save()
     {
         if (Id != 0)
@@ -77,6 +80,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+
         Estados estados = new Estados();
         estados.Estado = true;
         estados.Id = 1;

@@ -6,6 +6,7 @@
 
 @inject HttpClient Http
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime;
 <h3>Detalles Region</h3>
 
 
@@ -25,17 +26,26 @@
         <table class="table">
             <tr>
                 <th>Nombre</th>
-                <th>Elimina 0  -- Agrega 1</th>
+                <th>Desasociar</th>
             </tr>
 
             @if (detalles.Municipios != null && detalles.Municipios.Count >= 0)
             {
                 @foreach (var item in detalles.Municipios)
                 {
-        <tr>
-            <td>@item.Nombre</td>
-            <td><InputText class="form-control"  @bind-Value="item.EliminaAgrega"></InputText></td>
-        </tr>
+                    <tr>
+                        <td>@item.Nombre</td>
+                        <td>
+                            <InputSelect id="Elimina" @bind-Value="item.EliminaAgrega" class="form-group">
+                                @foreach (var item in @Elimina)
+                                        {
+                                    <option value="@item.id"> @item.Descripcion</option>
+                                        }
+                            </InputSelect>
+
+                            @*<InputText class="form-control" @bind-Value="item.EliminaAgrega"></InputText>*@
+                        </td>
+                    </tr>
                 }
             }
 
@@ -53,47 +63,62 @@
 
     </div>
 </EditForm>
-    @code {
-        [Parameter]
-        public int Id { get; set; }
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public string idElimina = "1";
+
+    public string url = "api/Region/";
+    RegionDetailsMunicipio _region = new RegionDetailsMunicipio();
+    RegionDetails detalles = new RegionDetails();
+    List<EliminaAgrega> Elimina = new List<EliminaAgrega>();
+    ResponseService _respuesta = new ResponseService();
+    private async Task Update()
+    {
+        var response = await Http.PutAsJsonAsync<RegionDetails>(url + "Update", detalles);
+        _respuesta = response.Content.ReadFromJsonAsync<ResponseService>().Result;
+        NavigationManager.NavigateTo("/Regiones");
 
 
-        public string url = "api/Region/";
-        RegionDetailsMunicipio _region = new RegionDetailsMunicipio();
-        RegionDetails detalles = new RegionDetails();
-
-        ResponseService _respuesta = new ResponseService();
-        private async Task Update()
-        {
-            var response = await Http.PutAsJsonAsync<RegionDetails>(url + "Update", detalles);
-            _respuesta = response.Content.ReadFromJsonAsync<ResponseService>().Result;
-            NavigationManager.NavigateTo("/Regiones");
-
-
-        }
-        protected override async Task OnInitializedAsync()
-        {
-            if (Id != 0)
-            {
-                _region = await Http.GetFromJsonAsync<RegionDetailsMunicipio>(url + "Get?id=" + Id);
-            }
-
-            detalles.IdRegion = _region.IdRegion;
-            detalles.NombreRegion = _region.NombreRegion;
-            List<MunicipioRegion> listaMunicipios = new List<MunicipioRegion>();
-            if(_region.municipios != null)
-            {
-                foreach (var item in _region.municipios)
-                {
-                    MunicipioRegion municipio = new MunicipioRegion();
-                    municipio.IdMunicipio = item.IdMunicipio;
-                    municipio.Nombre = item.NombreMunicipio;
-                    municipio.EliminaAgrega = "1";
-                    listaMunicipios.Add(municipio);
-                }
-            }
-
-            detalles.Municipios = listaMunicipios;
-
-        }
     }
+
+    private async Task mensaje()
+    {
+        bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Solo es valodo el 0 o el 1");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            _region = await Http.GetFromJsonAsync<RegionDetailsMunicipio>(url + "Get?id=" + Id);
+        }
+
+        detalles.IdRegion = _region.IdRegion;
+        detalles.NombreRegion = _region.NombreRegion;
+        List<MunicipioRegion> listaMunicipios = new List<MunicipioRegion>();
+        if (_region.municipios != null)
+        {
+            foreach (var item in _region.municipios)
+            {
+                MunicipioRegion municipio = new MunicipioRegion();
+                municipio.IdMunicipio = item.IdMunicipio;
+                municipio.Nombre = item.NombreMunicipio;
+                municipio.EliminaAgrega = "1";
+                listaMunicipios.Add(municipio);
+            }
+        }
+
+        detalles.Municipios = listaMunicipios;
+
+        EliminaAgrega _Elimina = new EliminaAgrega();
+        _Elimina.id = "1";
+        _Elimina.Descripcion = "Asociado";
+        Elimina.Add(_Elimina);
+        _Elimina = new EliminaAgrega();
+        _Elimina.id = "0";
+        _Elimina.Descripcion = "Desasociar";
+        Elimina.Add(_Elimina);
+        //Elimina = Elimina.OrderByDescending(x=> x.id);
+
+    }
+}

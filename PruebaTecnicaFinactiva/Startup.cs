@@ -35,7 +35,9 @@ namespace PruebaTecnicaFinactiva
             httpClientHandler.ServerCertificateCustomValidationCallback = (mesage, cert, chain, errors) => true;
             services.AddSingleton(new HttpClient(httpClientHandler)
             {
-                BaseAddress = new Uri("https://localhost:44327/")
+                BaseAddress = new Uri("https://pruebatecnicafinactiva.azurewebsites.net/")
+                //BaseAddress = new Uri("https://localhost:44327/")
+                
             });
         }
 
