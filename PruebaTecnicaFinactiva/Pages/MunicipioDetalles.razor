@@ -1,0 +1,66 @@
+﻿@page "/MunicipioDetalles/{Id:int}"
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Data
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+<h3>Municipios Detalles</h3>
+
+
+
+
+
+<div class="container-fluid">
+    <table class="table">
+        <tr>
+            <th>Nombre del Municipio</th>
+        </tr>
+        <tr>
+            <td>@Municipiodetta.NombreMunicipio</td>
+        </tr>
+    </table>
+    <br />
+    <br />
+    <table class="table">
+        <tr>
+            <th>Regiones asociadas al Municipio</th>
+        </tr>
+
+        @if (Municipiodetta.Regions != null && Municipiodetta.Regions.Count >= 0)
+        {
+            @foreach (var item in Municipiodetta.Regions)
+            {
+                <tr>
+                    <td>@item.NombreRegion</td>
+                </tr>
+            }
+        }
+
+    </table>
+
+</div>
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+
+    public string url = "api/Municipio/";
+    MunicipioDetails Municipiodetta = new MunicipioDetails();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+             Municipiodetta = await Http.GetFromJsonAsync<MunicipioDetails>(url + "Get?id=" + Id);
+        }
+
+    }
+
+
+}
+
+

@@ -1,0 +1,36 @@
+﻿@page "/EliminarMunicipio/{Id:int}"
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Data
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+<h3>Eliminar Municipio</h3>
+<p>Estas seguro de eliminar el Municipio?</p>
+
+<div>
+    <button @onclick="Eliminar">Eliminar</button>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+
+    public string url = "api/Municipio/";
+    ResponseService _respuesta = new ResponseService();
+    Municipio municipio = new Municipio();
+    private async Task Eliminar()
+    {
+        if (Id != 0)
+        {
+            var response = await Http.DeleteAsync(url + "Delete?id="+Id);
+            _respuesta = response.Content.ReadFromJsonAsync<ResponseService>().Result;
+            NavigationManager.NavigateTo("/Municipios");
+        }
+
+    }
+}

@@ -1,0 +1,55 @@
+﻿@page "/Municipios"
+
+
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@using PruebaTecnicaFinactiva.Data
+
+@inject HttpClient Http
+   
+
+
+    <h3>Municipios</h3>
+
+    <div class="row">
+        <div class="col-12 text-right">
+            <a href="MunicipioForm">Nuevo Municipio</a>
+        </div>
+    </div>
+    <br />
+    <br />
+    <table class="table">
+        <tr>
+            <th>Nombre</th>
+            <th>Estado</th>
+        </tr>
+
+        @if (municipios != null && municipios.Count >= 0)
+        {
+            @foreach (var item in municipios)
+            {
+                <tr>
+                    <td>@item.NombreMunicipio</td>
+                    <td>@item.Estado</td>
+                    <td>
+                        <a href="/MunicipioDetalles/@item.IdMunicipio">Detalles - </a>
+                        <a href="/MunicipioForm/@item.IdMunicipio">Editar - </a>
+                        <a href="/EliminarMunicipio/@item.IdMunicipio">Eliminar</a>
+                    </td>
+
+                </tr>
+            }
+        }
+
+    </table>
+
+    @code {
+        public string url = "api/Municipio/GetAll";
+
+        public List<Data.Municipio> municipios = new List<Data.Municipio>();
+
+        protected override async Task OnInitializedAsync() =>
+            municipios = await Http.GetFromJsonAsync<List<Data.Municipio>>(url);
+
+    }

@@ -1,0 +1,107 @@
+﻿@page "/Asociarregionmunicipio/{Id:int}"
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Data
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JsRuntime;
+<h3>Asociar Municipio</h3>
+
+
+<EditForm Model="@detalles">
+    <div class="container-fluid">
+        <div class="form-group" row mb-1>
+            <label>Nombre</label>
+            <div class="col-sm-9">
+                <InputText class="form-control" @bind-Value="@detalles.NombreRegion"></InputText>
+            </div>
+
+        </div>
+        <br />
+        <br />
+        <div class="form-group" row mb-1>
+            <label>Municipios</label>
+            <div class="col-sm-9">
+                <InputSelect id="municipios" @bind-Value="@idMunicipio" class="form-group">
+                    @foreach (var item in municipios)
+                    {
+                        <option value="@item.IdMunicipio"> @item.NombreMunicipio</option>
+                    }
+                </InputSelect>
+            </div>
+
+        </div>
+
+
+
+        <br />
+
+        <div class="form-group" row mb-1>
+            <div class="col-sm-12">
+                <button class="btn btn-primary" @onclick="Update">Asociar</button>
+            </div>
+
+        </div>
+
+    </div>
+</EditForm>
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public string idMunicipio;
+
+    public string urlMunicipio = "api/Municipio/GetAll";
+
+    public List<Data.Municipio> municipios = new List<Data.Municipio>();
+    MunicipioRegion municipioAsociar = new MunicipioRegion();
+    public string url = "api/Region/";
+    RegionDetailsMunicipio _region = new RegionDetailsMunicipio();
+    RegionDetails detalles = new RegionDetails();
+
+    ResponseService _respuesta = new ResponseService();
+    private async Task Update()
+    {
+        if (idMunicipio == null)
+        {
+            bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "Seleccione un Municipio valido");
+        }
+        else
+        {
+            municipioAsociar.IdMunicipio = int.Parse(idMunicipio);
+            municipioAsociar.EliminaAgrega = "1";
+            detalles.Municipios = new List<MunicipioRegion>();
+            detalles.Municipios.Add(municipioAsociar);
+            var response = await Http.PutAsJsonAsync<RegionDetails>(url + "Update", detalles);
+            _respuesta = response.Content.ReadFromJsonAsync<ResponseService>().Result;
+            if (_respuesta.Code.Equals("200OK"))
+            {
+                NavigationManager.NavigateTo("/Regiones");
+            }
+            else
+            {
+                bool confirmed = await JsRuntime.InvokeAsync<bool>("confirm", "El municipio esta en estado inactivo");
+            }
+        }
+
+
+
+
+
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        municipios = await Http.GetFromJsonAsync<List<Data.Municipio>>(urlMunicipio);
+        municipios.Add(new Municipio() { IdMunicipio = 0, Estado = false, NombreMunicipio = "Seleccione un Municipio" });
+
+        municipios = municipios.OrderBy(x => x.IdMunicipio).ToList();
+
+        _region = await Http.GetFromJsonAsync<RegionDetailsMunicipio>(url + "Get?id=" + Id);
+
+
+        detalles.IdRegion = _region.IdRegion;
+        detalles.NombreRegion = _region.NombreRegion;
+
+    }
+}

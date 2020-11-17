@@ -1,0 +1,54 @@
+﻿@page "/Regiones"
+
+
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@using PruebaTecnicaFinactiva.Data
+
+@inject HttpClient Http
+
+
+
+<h3>Municipios</h3>
+
+<div class="row">
+    <div class="col-12 text-right">
+        <a href="RegionForm">Nueva Region</a>
+    </div>
+</div>
+<br />
+<br />
+<table class="table">
+    <tr>
+        <th>Nombre</th>
+    </tr>
+
+    @if (regiones != null && regiones.Count >= 0)
+    {
+        @foreach (var item in regiones)
+        {
+            <tr>
+                <td>@item.NombreRegion</td>
+                <td>
+                    <a href="/DetallesRegion/@item.IdRegion">Detalles - </a>
+                    <a href="/EditarRegion/@item.IdRegion">Editar - </a>
+                    <a href="/Asociarregionmunicipio/@item.IdRegion">Asociar Municipio - </a>
+                    <a href="/EliminarRegion/@item.IdRegion">Eliminar</a>
+                </td>
+
+            </tr>
+        }
+    }
+
+</table>
+
+@code {
+    public string url = "api/Region/GetAll";
+
+    public List<Data.RegionDto> regiones = new List<Data.RegionDto>();
+
+    protected override async Task OnInitializedAsync() =>
+        regiones = await Http.GetFromJsonAsync<List<Data.RegionDto>>(url);
+
+}
